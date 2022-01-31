@@ -1,11 +1,40 @@
 const express = require('express');
+const { initializeApp, cert } = require("firebase-admin/app");
+const { getFirestore } = require("firebase-admin/firestore");
+
+const credentials = require("./credentials.json"); // ../ points to the directory above the current directory
+
+initializeApp({
+    credential: cert(credentials),
+})
+
+const db = getFirestore();
+
 
 const app = express();
 app.use(express.json());
 
 
 app.get('/', (request, response) => {
-    response.send('Hello World!');
+    const userCollection = db.collection("users");
+
+    //could also use this 
+   userCollection.get().then(snapshot =>{
+     response.send(snapshot.docs)
+    })
+     
+/* userCollection
+    .get()
+    .then(snapshot => {
+
+        const users = []
+        snapshot.forEach(doc => {
+            users.push({id: doc.id, ...doc.data()}) // ... is a spread operator
+        })
+        // response.send(snapshot.docs) 
+        */
+
+    // response.send('Hello World!');
 })
 
 app.post('/users', (req, res) => {
@@ -15,12 +44,12 @@ app.post('/users', (req, res) => {
     */
 
     const user = { name, age, email };
-    /* const user = {
-        fullName: name,
-        age: age,
-        email: email
-    }
-    */
+    /* 
+    const user = {
+    fullName: name,
+    age: age,
+    email: email
+    }; */
 
     const result = `My name ${user.name}, I am ${user.age} years old and my email is ${user.email}`;
 
